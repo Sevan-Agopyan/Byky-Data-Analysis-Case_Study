@@ -1,0 +1,270 @@
+---
+title: "Bike-Sharing Case Study"
+author: "Sevan Agopyan"
+date: "2023-04-29"
+output: html_document
+---
+
+
+![Bike Sharing System](Bicycle-sharing_system.jpg)
+ 
+## Study Overview
+In this case study I am going to present **Byky**, a fictitious bike-sharing company, to follow the steps of the data analysis process: ask, prepare, process, analyze,share, and act.  
+In 2021, Byky launched its operations as a bike-share company. Since then, its business has grown to a fleet of 3500 bicycles that are geo-tracked and locked into a network of 350 stations. The bikes can be unlocked from one station and
+returned to any other station in the system anytime.Company has several types of pricing plans including **single-ride passes**, **full-day passes**
+and **annual memberships**. Customers purchase single-ride or full-day passes are regarded as casual riders. Customers who purchase annual memberships are referred as Byky members.  
+In order to provide the marketing director with informed decisions for launching a marketing campaign my task is to understand how annual members and casual riders differ. Along this study I will demonstrate each Data Analysis steps that are listed below  
+
+- **Ask**
+- **Prepare**
+- **Process**
+- **Analyze**
+- **Share**
+- **Act**  
+
+## Ask Phase  
+
+Asking the relevant and open ended questions while considering the needs of stakeholder is the key parts of **Ask** phase.  
+
+* **Identify the business task:** The task is to figure of how different customer
+types differ in using the service?
+* **How can these insights drive business decisions?:** Based on the observations marketing campaign will be shaped.  
+
+## Prepare
+
+Below are questions that need to be answered in **Prepare** phase  
+
+* Where is your data located?: Data located in the cloud. 
+* How is the data organized?: Data is organized as csv files for each month for 
+the past 12 months.
+* Are there issues with bias or credibility in this data? Does your data ROCCC?
+* How are you addressing licensing, privacy, security, and accessibility?: Data that is provided is a open source public data meaning the data can be used, manipulated and shared freely.
+* How did you verify the data’s integrity? Data integrity means that it is clean, complete, consistent, and relevant. 
+* How does it help you answer your question? The granularity and the context of the data allow us to achieve the business task
+* Are there any problems with the data?: There are some missing station names within data. I am not expecting to have problem, because I will not include station names in analysis.  
+In the Prepare stage I downloaded monthly csv data separately. Checked their integrity using spreadsheet program. I also confirmed that there is no accessibility issues and the data covers the expectations of the business task.
+
+## Process
+
+Is the phase where the data is processed and gets ready for analysis.  
+Below are the questions that needs to be answered during the process stage:
+
+ * What tools will be used: I decided to use R. R is great for data data wrangling and manipulation including statistics. It also has a great tool for data visualization called **ggplot2**
+ * What steps have been taken for data cleaning: R code blocks presented below ensures clean data.
+ * Have you documented your cleaning process so you can review and share those results?: One of the reasons I choose R over spreadsheet application is reproducability.  
+ 
+Below are the steps followed for the process stage.
+ 
+1. Download the previous 12 months of **Byky** trip data.
+2. Unzip the files.
+3. Create a dedicated folder on my desktop to house the files. Used appropriate file-naming conventions.
+4. Create subfolders for the .CSV files. downloaded files to the appropriate subfolder.
+5. Launch Excel, open each file, and choose to Save As an Excel Workbook file. Put it in the subfolder you created for .XLS files.
+6. Open your spreadsheet and create a column called “ride_length.” Calculate the length of each ride by subtracting the
+column “started_at” from the column “ended_at” (for example, =D2-C2) and format as HH:MM:SS using Format > Cells >
+Time > 37:30:55.
+7. Create a column called “day_of_week,” and calculate the day of the week that each ride started using the “WEEKDAY”
+command (for example, =WEEKDAY(C2,1)) in each file. Format as General or as a number with no decimals, noting that
+1 = Sunday and 7 = Saturday.
+ 
+## Analyze
+
+ Now that data is stored appropriately and has been prepared for analysis, start putting it to work.  
+ Below are the tasks that were performed during Analyze phase.  
+ 
+1. Aggregate your data so it’s useful and accessible.
+2. Organize and format your data.
+3. Perform calculations.
+4. Identify trends and relationships.  
+
+The purpose of this script is to consolidate downloaded Byky data into a single dataframe and then conduct simple analysis to help answer the key question: **In what ways do members and casual riders use bikes differently?**  
+We will start by installing and loading the appropriate packages to conduct this analysis:  
+
+* `tidyverse` for data import and manipulation. This library also includes `ggplot2` for data visualization
+* `lubridate` for date functions  
+
+below code installs the packages needed
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+install.packages("tidyverse")
+install.packages("lubridate")
+```
+  
+Below code loads the installed packages  
+```{r echo=TRUE}
+library(tidyverse)
+library(lubridate)
+```
+It is time to get and set the current working directory to prevent any potential issues may arise when connecting to data files
+```{r}
+getwd()
+```
+We have to load files into tibbles. For the purpose we are going to use `read_csv` function that is part of `readr` package, that is part of core `tidyverse` library. If you’ve used R before, you might wonder why I am not using read.csv(). There are a few good reasons to favour readr functions over the base equivalents:  
+
+* `readr` functions are much more faster (~10x times)
+* They produce tibbles, they don’t convert character vectors to factors, use row names, or munge the column names. These are common sources of frustration with the base R functions.
+* They are more reproducible. Base R functions inherit some behavior from your operating system and environment variables, so import code that works on your computer might not work on someone else’s.  
+
+```{r include=FALSE}
+d202204 <- read_csv("202204-Byky.csv")
+d202205 <- read_csv("202205-Byky.csv")
+d202206 <- read_csv("202206-Byky.csv")
+d202207 <- read_csv("202207-Byky.csv")
+d202208 <- read_csv("202208-Byky.csv")
+d202209 <- read_csv("202209-Byky.csv")
+d202210 <- read_csv("202210-Byky.csv")
+d202211 <- read_csv("202211-Byky.csv")
+d202212 <- read_csv("202212-Byky.csv")
+d202301 <- read_csv("202301-Byky.csv")
+d202302 <- read_csv("202302-Byky.csv")
+d202303 <- read_csv("202303-Byky.csv")
+```
+While the names don't have to be in the same order, they DO need to match perfectly before we can use a command to join them into one file. Below `glimpse` function 
+is handy for this specific case, since it displays the column names and their data type side to side.
+
+```{r}
+glimpse(d202204)
+glimpse(d202205)
+glimpse(d202206)
+glimpse(d202207)
+glimpse(d202208)
+glimpse(d202209)
+glimpse(d202210)
+glimpse(d202211)
+glimpse(d202212)
+glimpse(d202301)
+glimpse(d202302)
+glimpse(d202303)
+```
+after ensuring that column names and data structures match and consistent, now can append all tables into a single table containing a full-year data.
+```{r}
+full_year <- bind_rows(d202204, d202205, d202206, d202207, d202208, d202209, d202210, 
+          d202211, d202212, d202301, d202302, d202303)
+```
+
+we need to select only the relevent colums. For this, we use `select()` function provided by `dplyr` package. We will skip the columsn *start_station_id*, *end_station_id*
+```{r}
+full_year <- full_year %>%
+  select(-c(start_station_id, end_station_id))
+head(full_year)
+```
+
+### CLEAN UP AND ADD DATA TO PREPARE FOR ANALYSIS
+It is time to inspect the table that has been created
+```{r}
+colnames(full_year)  #List of column names
+nrow(full_year)  #How many rows are in data frame?
+dim(full_year)  #Dimensions of the data frame?
+head(full_year)  #See the first 6 rows of data frame.  Also tail(all_trips)
+str(full_year)  #See list of columns and data types (numeric, character, etc)
+summary(full_year)  #Statistical summary of data. Mainly for numerics
+
+```
+We need to view the distinct values inside **member_casual** column to be sure if the values meet our expectations.
+```{r}
+full_year %>%
+  distinct(member_casual)
+```
+
+we are now sure the column **member_casual** has two separate values there are *member* and *casual*  
+checking the number of distinct values for*start_station_name* and *end_station_name* will also beneficial
+```{r}
+n_distinct(full_year$start_station_name)
+n_distinct(full_year$end_station_name)
+```
+We see that there are **1700** start stations and **1724** end stations  
+
+The data can only be aggregated at the **ride_id** level, which is too granular. We will want to add some additional columns of data, such as day, month, year -- that provide additional opportunities to aggregate the data.
+```{r}
+full_year_modified <- full_year %>% 
+  mutate(year=year(started_at), month = month(started_at),
+         day_of_month = mday(started_at), day_of_week = wday(started_at),
+         trip_length = as.numeric(ended_at - started_at))
+
+select(full_year_modified, ended_at, started_at, trip_length, year, month, day_of_week) %>%
+  arrange(trip_length)
+```
+sorting the above data by trip_length in ascending order reveal the rows with negative values that are not relevant. Negative values indicate the bikes were taken for repair and/check purpose by the company. We have to create a new version pf our dataframe where negative values are omitted.
+```{r}
+full_year_modified_v2 <- full_year_modified[!(full_year_modified$trip_length<=0 | full_year_modified$start_station_name == "HQ QR"),]
+```
+we see that there are `r nrow(full_year_modified) - nrow(full_year_modified_v2)` rows that should be taken out from the final dataframe. So this is accomplished with the code above
+### COnduct Descriptive Analysis
+Descriptive Analysis on trip length  
+```{r}
+summary(full_year_modified_v2$trip_length)
+```
+It seems there are NA values for trip length. We have to get rid of them
+```{r}
+full_year_modified_v2 <- full_year_modified_v2[!(is.na(full_year_modified_v2$trip_length)),]
+summary(full_year_modified_v2$trip_length)
+```
+Descriptive Analysis on member type  
+```{r}
+member_type_summary <- full_year_modified_v2 %>%
+  group_by(member_casual) %>%
+  summarise(mean_trip_duration_seconds = mean(trip_length),
+            mean_trip_duration_minutes = mean(trip_length)/60,
+            median_trip_duratin = median(trip_length),
+            max_trip_duration_hours = max(trip_length)/60/60,
+            min_trip_duration = min(trip_length),
+            n = n())
+head(member_type_summary)
+
+```
+from the results these are obvious:  
+
+* customers with one-time pass or day_pass ride `r 31.09 / 12.59` times more than members in average
+* on th other hand number of members `r 2974045 / 1990081` times more used the service  
+
+see the average trip time and count of trips for the week-days
+```{r}
+week_day_summary <- full_year_modified_v2 %>%
+  group_by(day_of_week) %>%
+  summarise(mean_trip_duration_seconds = mean(trip_length),
+            mean_trip_duration_minutes = mean(trip_length)/60,
+            median_trip_duratin = median(trip_length),
+            max_trip_duration_hours = max(trip_length)/60/60,
+            min_trip_duration = min(trip_length),
+            n = n())
+head(week_day_summary)
+```
+observations:  
+
+* In average longest trips were made in sunday with 25 minutes average
+* on Wednesdays the mid of the week were the shortest average trip with 16.6 minutes
+* However interestingly Thursdays were the most tripped day of the week
+
+Now, let's run the average ride time by each day for members vs casual users
+```{r}
+week_day_summary_per_customer_type <- full_year_modified_v2 %>%
+  group_by(day_of_week, member_casual) %>%
+  summarise(mean_trip_duration_seconds = mean(trip_length),
+            mean_trip_duration_minutes = mean(trip_length)/60,
+            median_trip_duratin = median(trip_length),
+            max_trip_duration_hours = max(trip_length)/60/60,
+            min_trip_duration = min(trip_length),
+            n = n())
+head(week_day_summary_per_customer_type)
+```
+observations:  
+* during work days members use much more frequently than casual riders
+
+## Share
+This is the phase where insights driven by analysis are visualized, polished and shared with the stakeholders
+
+the key tasks for this stage can be ordered as below;  
+
+1. Determine the best way to share your findings.
+2. Create effective data visualizations.
+3. Present your findings.
+4. Ensure your work is accessible.
+
+```{r}
+week_day_summary_per_customer_type %>%
+  ggplot(mapping = aes(x=day_of_week, y=mean_trip_duration_minutes, color = member_casual)) +
+  geom_line()
+```
+## Act
+Now that we have finished creating visualizations, it is time to inform the stakeholders on those findings.
+
+
